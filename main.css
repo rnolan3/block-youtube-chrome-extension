@@ -1,0 +1,38 @@
+@-webkit-keyframes blink {
+  from { opacity: 1.0; }
+  to { opacity: 0.0; }
+}
+
+.youtube-blocker-widget {
+  background: rgba(33, 37, 43, .9);
+  color: rgba(255, 255, 255, .9);
+  font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
+  font-size: 15px;
+  padding: 10px 15px;
+  position: fixed;
+  right: 5px;
+  text-align: center;
+  top: 5px;
+  transition: all 500ms;
+  z-index: 3047483648;
+}
+
+.youtube-blocker-widget-done {
+  background: rgba(33, 37, 43, .99);
+  bottom: 0;
+  font-size: 40px;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+.youtube-blocker-widget-done .youtube-blocker-label {
+  -webkit-animation-duration: 1s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: blink;
+  -webkit-animation-timing-function: cubic-bezier(.5, 0, 1, 1);
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
