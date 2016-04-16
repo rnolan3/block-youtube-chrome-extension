@@ -1,0 +1,2 @@
+instrumentation:
+    excludes: [spec/**/*, main.js, webpack.config.js]

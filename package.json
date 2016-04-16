@@ -1,0 +1,16 @@
+{
+  "name": "youtube-blocker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "istanbul cover --include-all-sources jasmine",
+    "watch": "webpack --watch"
+  },
+  "author": "Robert Nolan",
+  "license": "ISC",
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "webpack": "^1.12.14"
+  }
+}
