@@ -11,13 +11,11 @@ const STORAGE_KEY = `timeLeft.${TODAY.getYear()}-${TODAY.getMonth()}-${TODAY.get
 
 function initTimer (time) {
   timerElem.label(time)
+  storage.subscribe((tl) => timerElem.label(tl))
 
   counter
     .setTime(time)
-    .each((tl) => {
-      storage.saveTime(tl)
-      timerElem.label(tl)
-    })
+    .each((tl) => storage.saveTime(tl))
     .done(() => {
       video.pause()
       timerElem.done()
