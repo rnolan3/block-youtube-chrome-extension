@@ -57,13 +57,11 @@
 
 	function initTimer (time) {
 	  timerElem.label(time)
+	  storage.subscribe((tl) => timerElem.label(tl))
 
 	  counter
 	    .setTime(time)
-	    .each((tl) => {
-	      storage.saveTime(tl)
-	      timerElem.label(tl)
-	    })
+	    .each((tl) => storage.saveTime(tl))
 	    .done(() => {
 	      video.pause()
 	      timerElem.done()
@@ -151,12 +149,17 @@
 	function play () {
 	  clearInterval(interval)
 	  interval = setInterval(_countDown, INTERVAL_DELAY)
+	  _countDown() // Start countdown immediately
 	  return _return
 	}
 
 	function setTime (newTime) {
-	  timeLeft = newTime
+	  timeLeft = parseInt(newTime)
 	  return _return
+	}
+
+	function getTime () {
+	  return timeLeft
 	}
 
 	module.exports = _return = {
@@ -164,7 +167,8 @@
 	  each,
 	  pause,
 	  play,
-	  setTime
+	  setTime,
+	  getTime
 	}
 
 
@@ -176,29 +180,54 @@
 
 	let storageKey = 'key'
 	let defaultTime = 0
+	let subscribers = []
+
+
+	chrome.storage.onChanged.addListener((e) => {
+	  let { newValue, oldValue } = e[storageKey]
+
+	  if (newValue !== oldValue) {
+	    subscribers.forEach((c) => c(newValue))
+	  }
+	})
 
 	exports.init = function (k, t) {
 	  storageKey = k
 	  defaultTime = t
+
+	  return { storageKey, defaultTime }
 	}
 
 	exports.getTime = function () {
-	  return new Promise((resolve) => {
-	    chrome.storage.local.get(storageKey, (result) => {
-	      const value = result[storageKey];
-	      resolve(typeof value !== 'undefined' ? value : defaultTime)
-	    })
+	  return new Promise((resolve, reject) => {
+	    try {
+	      chrome.storage.local.get(storageKey, (result) => {
+	        const value = result[storageKey];
+	        resolve(typeof value !== 'undefined' ? value : defaultTime)
+	      })
+	    } catch (e) {
+	      reject('There was a problem fetching from chrome storage.')
+	    }
 	  })
 	}
 
 	exports.saveTime = function (t) {
-	  return new Promise((resolve) => {
+	  return new Promise((resolve, reject) => {
 	    let storageObj = {}
 	    storageObj[storageKey] = t
-	    chrome.storage.local.set(storageObj, (result) => {
-	      resolve(result)
-	    })
+
+	    try {
+	      chrome.storage.local.set(storageObj, (result) => {
+	        resolve(result)
+	      })
+	    } catch (e) {
+	      reject('There was a problem saving to chrome storage.')
+	    }
 	  })
+	}
+
+	exports.subscribe = function (callback) {
+	  subscribers.push(callback)
 	}
 
 
@@ -236,6 +265,16 @@
 	  widget.classList.add('youtube-blocker-widget-done')
 	}
 
+	exports.getDOMNode = function (elem) {
+	  switch (elem) {
+	    case 'widget':
+	      return widget
+
+	    case 'label':
+	      return label
+	  }
+	}
+
 
 /***/ },
 /* 4 */
@@ -264,11 +303,11 @@
 	  video = document.getElementsByTagName('video')[0]
 
 	  if (video) {
-	    video.addEventListener('pause', () => {
+	    video.addEventListener('pause', function() {
 	      onPauseCallback()
 	    })
 
-	    video.addEventListener('play', () => {
+	    video.addEventListener('play', function() {
 	      onPlayCallback()
 	    })
 	  }
